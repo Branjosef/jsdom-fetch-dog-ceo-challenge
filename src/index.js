@@ -1,57 +1,53 @@
-console.log('%c HI', 'color: firebrick')
+document.addEventListener('DOMContentLoaded', () => {
 
+  let dogImageContainer = document.getElementById('dog-image-container')
+  let dogBreeds = document.getElementById('dog-breeds')
+  let dropDown = document.getElementById('breed-dropdown')
 
-document.addEventListener("DOMContentLoaded", () => {
-  main();
-});
-
-function main(){
-  dogImages();
-  dogBreeds();
-};
-
-
-function dogImages(){fetch('https://dog.ceo/api/breeds/image/random/4')
+  fetch("https://dog.ceo/api/breeds/image/random/4")
   .then(resp => resp.json())
-  .then(json => dogImgIndex(json.message))
-};
+  .then(breeds => {
+      dogImageContainer.innerHTML = ' '
+      breeds.message.forEach(breed => {
+      dogImageContainer.innerHTML += breedIndex(breed)
+      })
+  })
 
-function dogImgIndex(imagesURL){
-const dogImgContainer = document.getElementById('dog-image-container')
-imagesURL.forEach(imageURL => {
-  const div = document.createElement('div')
-  const img = document.createElement('img')
-  img.src = imageURL
-  dogImgContainer.appendChild(div)
-  div.appendChild(img)
- })
-}
+  const breedIndex = (breed) => {
+    return ` <div> <img src='${breed}'></img></div>`
+  }
 
-function dogBreeds(){fetch('https://dog.ceo/api/breeds/list/all')
+  fetch("https://dog.ceo/api/breeds/list/all")
   .then(resp => resp.json())
-  .then(json => Object.keys(json.message).forEach(breed => {
-    modBreed(breed)
-  }))
-};
+  .then(allBreeds => {
+      Object.keys(allBreeds.message).forEach(breed => {    //Object.keys is what is used to pull all keys as an array that you can then iterate through
+        dogBreeds.innerHTML += allBreedIndex(breed)
+      })
+  })
 
-function modBreed(breed) {
-  let ul = document.querySelector('#dog-breeds')
-  let li = document.createElement('li')
-  li.addEventListener('click', changeColor)
-  li.innerText = breed
-  let dropDown = document.querySelector('#breed-dropdown')
-  ul.appendChild(li)
-  dropDown.addEventListener('change', () => {
-    if (li.innerText[0] === dropDown.value) {
-      ul.appendChild(li)
-    } else {
-      li.remove
+  const allBreedIndex = (breed) => {
+    return `<li class ='${breed[0]}'>${breed}</li>`
+  }
+
+  dogBreeds.addEventListener('click', (event) => {
+    if (event.target.className === 'li') {
+      event.target.style.color = "blue"
     }
   })
-}
 
-function changeColor(event) {
-  event.target.style.color = "blue"
-}
-
-
+  dropDown.addEventListener('change', (event) => {
+   const breeds =  dogBreeds.querySelectorAll('li')
+    breeds.forEach(breed => {
+    breed.style.removeProperty('display')})
+  
+    breeds.forEach(breed => {
+      if (breed.className != event.target.value) {
+        breed.style.display = 'none'}
+      })
+    if (event.target.value === 'all') {
+      breeds.forEach(breed => {
+        breed.style.removeProperty('display')
+      })
+    }
+   })
+})
